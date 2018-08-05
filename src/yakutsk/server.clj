@@ -2,9 +2,8 @@
   (:require
     [rum.core :as rum]
     [immutant.web :as web]
-    [compojure.core :as cj]
     [clojure.java.io :as io]
-    [compojure.route :as cjr])
+    [compojure.core :as compojure])
   (:import
     [org.joda.time DateTime]
     [org.joda.time.format DateTimeFormat]))
@@ -69,14 +68,14 @@
   (str "<!DOCTYPE html>" (rum/render-static-markup component)))
 
 
-(cj/defroutes routes
-  (cj/GET "/" [:as req]
+(compojure/defroutes routes
+  (compojure/GET "/" [:as req]
     { :body (render-html (index movies)) })
 
-  (cj/GET "/write" [:as req]
+  (compojure/GET "/write" [:as req]
     { :body "WRITE" })
 
-  (cj/POST "/write" [:as req]
+  (compojure/POST "/write" [:as req]
     { :body "POST" }))
 
 
