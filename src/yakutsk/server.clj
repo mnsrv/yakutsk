@@ -3,7 +3,10 @@
     [rum.core :as rum]
     [immutant.web :as web]
     [compojure.core :as cj]
-    [compojure.route :as cjr]))
+    [compojure.route :as cjr])
+  (:import
+    [org.joda.time DateTime]
+    [org.joda.time.format DateTimeFormat]))
 
 
 (def movies
@@ -25,12 +28,23 @@
   }")
 
 
+(def date-formatter (DateTimeFormat/forPattern "dd.MM.YYYY"))
+(def date-year-formatter (DateTimeFormat/forPattern "YYYY"))
+
+
+(defn render-date [inst]
+  (.print date-formatter (DateTime. inst)))
+
+(defn render-date-year [inst]
+  (.print date-year-formatter (DateTime. inst)))
+
+
 (rum/defc movie [movie]
   [:.movie
-    [:span (:watched movie)]
+    [:span (render-date (:watched movie))]
     [:h2 (:title movie)]
     [:p "Оценка: " (:rate movie)]
-    [:p "Дата релиза: " (:released movie)]])
+    [:p "Год релиза: " (render-date-year (:released movie))]])
 
 
 (rum/defc page [title & children]
