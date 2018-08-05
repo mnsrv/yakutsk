@@ -6,7 +6,8 @@
     [compojure.core :as compojure])
   (:import
     [org.joda.time DateTime]
-    [org.joda.time.format DateTimeFormat]))
+    [org.joda.time.format DateTimeFormat])
+  (:gen-class))
 
 
 (def movies

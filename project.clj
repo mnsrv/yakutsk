@@ -6,4 +6,10 @@
     [compojure                  "1.6.1"]
     [rum                        "0.11.2"]
   ]
-  :main "yakutsk.server")
+  :main yakutsk.server
+  :profiles {
+    :uberjar {
+      :aot [yakutsk.server]
+      :uberjar-name "yakutsk.jar"
+    }
+  })
