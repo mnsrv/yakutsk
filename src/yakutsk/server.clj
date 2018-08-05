@@ -3,6 +3,7 @@
     [rum.core :as rum]
     [immutant.web :as web]
     [compojure.core :as cj]
+    [clojure.java.io :as io]
     [compojure.route :as cjr])
   (:import
     [org.joda.time DateTime]
@@ -22,29 +23,7 @@
      :rate      3 }])
 
 
-(def styles "
-  * {
-    box-sizing: border-box;
-  }
-  body {
-    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol';
-    margin: 0;
-  }
-  header {
-    padding: 1.5rem;
-  }
-  header h1 {
-    margin: 0;
-  }
-  header p {
-    margin-top: 0.5rem;
-    margin-bottom: 0;
-  }
-  section {
-    padding: 1.5rem;
-  }
-")
-
+(def styles (slurp (io/resource "style.css")))
 
 (def date-formatter (DateTimeFormat/forPattern "dd.MM.YYYY"))
 (def date-year-formatter (DateTimeFormat/forPattern "YYYY"))
