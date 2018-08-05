@@ -1,12 +1,22 @@
 (ns yakutsk.server
   (:require
-    [immutant.web :as web]))
+    [immutant.web :as web]
+    [compojure.core :as cj]
+    [compojure.route :as cjr]))
 
 
-(def app
-  (fn [req]
-    { :status 200
-      :body (:uri req) }))
+(cj/defroutes routes
+  (cj/GET "/" [:as req]
+    { :body "INDEX" })
+
+  (cj/GET "/write" [:as req]
+    { :body "WRITE" })
+
+  (cj/POST "/write" [:as req]
+    { :body "POST" }))
+
+
+(def app routes)
 
 
 (defn -main [& args]
