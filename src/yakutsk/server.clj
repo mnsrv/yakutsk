@@ -97,6 +97,7 @@
         port-str (or (get args-map "-p")
                      (get args-map "--port")
                      "8080")]
+    (println "Starting web server on port" port-str)
     (web/run #'app { :port (Integer/parseInt port-str) })))
 
 

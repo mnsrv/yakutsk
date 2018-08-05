@@ -5,4 +5,5 @@
     [org.immutant/web           "2.1.10"]
     [compojure                  "1.6.1"]
     [rum                        "0.11.2"]
-  ])
+  ]
+  :main "yakutsk.server")
