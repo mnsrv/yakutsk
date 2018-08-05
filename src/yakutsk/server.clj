@@ -22,10 +22,28 @@
      :rate      3 }])
 
 
-(def styles
-  "body {
+(def styles "
+  * {
+    box-sizing: border-box;
+  }
+  body {
     font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol';
-  }")
+    margin: 0;
+  }
+  header {
+    padding: 1.5rem;
+  }
+  header h1 {
+    margin: 0;
+  }
+  header p {
+    margin-top: 0.5rem;
+    margin-bottom: 0;
+  }
+  section {
+    padding: 1.5rem;
+  }
+")
 
 
 (def date-formatter (DateTimeFormat/forPattern "dd.MM.YYYY"))
@@ -51,20 +69,21 @@
   [:html
     [:head
       [:meta { :charset "utf-8" }]
-      [:title title]
+      [:title "Сайт Саши Мансурова"]
       [:meta { :name "viewport" :content "initial-scale=1.0, width=device-width" }]
       [:style { :dangerouslySetInnerHTML { :__html styles } }]]
     [:body
       [:header
         [:h1 title]
-        [:p "Фронтенд разработчик в " [:a { :href "https://rocketbank.ru/loves/sasha" :target "_blank" } "Рокетбанке"]]]
-      children]])
+        [:p "Фронтенд разработчик в Рокетбанке"]]
+      [:main children]]])
 
 
 (rum/defc index [movies]
-  (page "Сашин Дом"
-    (for [m movies]
-      (movie m))))
+  (page "Саша Мансуров"
+    [:section
+      (for [m movies]
+        (movie m))]))
 
 
 (defn render-html [component]
