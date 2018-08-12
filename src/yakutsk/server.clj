@@ -77,7 +77,10 @@
     { :body "WRITE" })
 
   (compojure/POST "/write" [:as req]
-    { :body "POST" }))
+    { :body "POST" })
+  (fn [req]
+    { :status 404
+      :body "404 Not found" }))
 
 
 (defn with-headers [handler headers]
