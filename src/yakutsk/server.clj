@@ -71,7 +71,7 @@
   (loop [start 1
          end (if (time/sunday? firstDay)
             1
-            (- 7 (time/value (time/day-of-week firstDay))))
+            (- 8 (time/value (time/day-of-week firstDay))))
          weeks []]
     (if (<= start daysInMonth)
       (recur
@@ -79,39 +79,24 @@
         (if (> (+ 7 end) daysInMonth)
           daysInMonth
           (+ 7 end))
-        (for [x (range 7)
-              :let [y (* x 3)]
-              :when (even? y)]
-          y)
-      )
+        (conj weeks (vec (for [i (range 7)
+              :let [x (cond
+                (= 6 (- end start)) (+ start i)
+                (= 1 start) (if (> (+ end i -6) 0) (+ end i -6) 0)
+                :else (if (<= (+ start i) end) (+ start i) 0))]]
+          x))))
       weeks)))
-month
-
-(time/value (time/day-of-week firstDay))
-(time/year-month now)
-(time/value (time/day-of-week (time/adjust now :first-day-of-month)))
-(time/period 1 :months)
-(time/year-month)
-(time/max-value (time/month))
-(time/day-of-week)
-(Integer/parseInt (time/format "F" (time/adjust now :first-day-of-month)))
-[[#inst "2018-08-12" 2] [3 4]]
-(apply mapv vector [[1 2] [3 4]])
-(vector [1 2] [3 4])
 
 
 (def calendar
   [:section
     [:h2 (nth localeMonths (dec (Integer/parseInt (time/format "M" now))))]
     [:.calendar
-      (for [week [[0 0 1 2 3 4 5]
-                  [6 7 8 9 10 11 12]
-                  [13 14 15 16 17 18 19]
-                  [20 21 22 23 24 25 26]
-                  [27 28 29 30 31 0 0]]]
+      (for [week month]
         [:.calendar__row
           (for [day week]
-            [:.calendar__cell (when (> day 0) day)])])]])
+            [:div { :class (if (= day (Integer/parseInt (time/format "d" now))) "calendar__cell calendar__cell_today" "calendar__cell") }
+              (when (> day 0) day)])])]])
 
 
 (rum/defc index [movies]

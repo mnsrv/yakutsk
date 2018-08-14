@@ -47,3 +47,6 @@ section {
   border-style: solid;
   border-color: transparent;
 }
+.calendar__cell_today {
+  border-color: red;
+}
