@@ -5,6 +5,8 @@
     [org.immutant/web           "2.1.10"]
     [ring/ring-core             "1.7.0-RC1"]
     [compojure                  "1.6.1"]
+    [cheshire                   "5.8.0"]
+    [clj-http                   "3.9.1"]
     [rum                        "0.11.2"]
   ]
   :main yakutsk.server

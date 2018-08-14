@@ -20,6 +20,11 @@ header p {
   margin-bottom: 0;
 }
 
+h1, h2, h3, h4, h5 {
+  margin-top: 0;
+  margin-bottom: .5em;
+}
+
 main {
   display: flex;
   flex-wrap: wrap;
@@ -49,4 +54,10 @@ section {
 }
 .calendar__cell_today {
   border-color: red;
+}
+
+.weather {
+  font-size: 6rem;
+  font-weight: 100;
+  text-align: center;
 }

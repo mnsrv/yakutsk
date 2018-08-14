@@ -4,6 +4,7 @@
     [java-time :as time]
     [immutant.web :as web]
     [clojure.java.io :as io]
+    [clj-http.client :as http]
     [compojure.core :as compojure])
   (:import
     [org.joda.time DateTime]
@@ -100,8 +101,22 @@
               (when (> day 0) day)])])]])
 
 
+(def weather
+  (try
+    [:section
+      [:h2 "Погода в Москве"]
+      [:.weather
+        (Math/round
+          (:temperature
+            (:body
+              (http/get "https://api.mansurov.me/weather" { :as :json }))))
+        "°"]]
+    (catch Exception e
+      (println "Weather request failed:"))))
+
+
 (rum/defc index [movies]
-  (page "Саша Мансуров" calendar))
+  (page "Саша Мансуров" calendar weather))
 
 
 (defn render-html [component]
