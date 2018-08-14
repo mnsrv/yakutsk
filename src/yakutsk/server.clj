@@ -60,7 +60,6 @@
 
 (def now (time/local-date))
 (def firstDay (time/adjust now :first-day-of-month))
-(def lastDay (time/adjust now :last-day-of-month))
 (def daysInMonth (time/max-value (time/property now :day-of-month)))
 (def localeMonths
   ["Январь", "Февраль", "Март",
@@ -71,7 +70,7 @@
   (loop [start 1
          end (if (time/sunday? firstDay)
             1
-            (- 8 (time/value (time/day-of-week firstDay))))
+            (- 8 (time/as firstDay :day-of-week)))
          weeks []]
     (if (<= start daysInMonth)
       (recur
@@ -83,19 +82,21 @@
               :let [x (cond
                 (= 6 (- end start)) (+ start i)
                 (= 1 start) (if (> (+ end i -6) 0) (+ end i -6) 0)
-                :else (if (<= (+ start i) end) (+ start i) 0))]]
+                :else (if (<= (+ start i) end)
+                  (+ start i)
+                  0))]]
           x))))
       weeks)))
 
 
 (def calendar
   [:section
-    [:h2 (nth localeMonths (dec (Integer/parseInt (time/format "M" now))))]
+    [:h2 (nth localeMonths (dec (time/as now :month-of-year)))]
     [:.calendar
       (for [week month]
         [:.calendar__row
           (for [day week]
-            [:div { :class (if (= day (Integer/parseInt (time/format "d" now))) "calendar__cell calendar__cell_today" "calendar__cell") }
+            [:div { :class ["calendar__cell" (when (= day (time/as now :day-of-month)) "calendar__cell_today")] }
               (when (> day 0) day)])])]])
 
 
