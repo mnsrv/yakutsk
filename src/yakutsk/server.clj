@@ -59,49 +59,56 @@
         [:p "Фронтенд разработчик в Рокетбанке"]]
       [:main children]]])
 
-(def now (time/local-date))
-(def firstDay (time/adjust now :first-day-of-month))
-(def daysInMonth (time/max-value (time/property now :day-of-month)))
 (def localeMonths
   ["Январь", "Февраль", "Март",
-   "Апрель", "Май", "Июнь",
-   "Июль", "Август", "Сентябрь",
-   "Октябрь", "Ноябрь", "Декабрь"])
-(def month
-  (loop [start 1
-         end (if (time/sunday? firstDay)
-            1
-            (- 8 (time/as firstDay :day-of-week)))
-         weeks []]
-    (if (<= start daysInMonth)
-      (recur
-        (inc end)
-        (if (> (+ 7 end) daysInMonth)
-          daysInMonth
-          (+ 7 end))
-        (conj weeks (vec (for [i (range 7)
-              :let [x (cond
-                (= 6 (- end start)) (+ start i)
-                (= 1 start) (if (> (+ end i -6) 0) (+ end i -6) 0)
-                :else (if (<= (+ start i) end)
-                  (+ start i)
-                  0))]]
-          x))))
-      weeks)))
+    "Апрель", "Май", "Июнь",
+    "Июль", "Август", "Сентябрь",
+    "Октябрь", "Ноябрь", "Декабрь"])
 
 
-(def calendar
+(defn now []
+  (time/local-date-time))
+(defn getMonths []
+  (let [firstDay (time/adjust (now) :first-day-of-month)
+        daysInMonth (time/max-value (time/property (now) :day-of-month))]
+    (loop [start 1
+           end (if (time/sunday? firstDay)
+              1
+              (- 8 (time/as firstDay :day-of-week)))
+           weeks []]
+      (if (<= start daysInMonth)
+        (recur
+          (inc end)
+          (if (> (+ 7 end) daysInMonth)
+            daysInMonth
+            (+ 7 end))
+          (conj weeks
+            (vec
+              (for [i (range 7)
+                :let [x
+                  (cond
+                    (= 6 (- end start)) (+ start i)
+                    (= 1 start) (if (> (+ end i -6) 0) (+ end i -6) 0)
+                    :else
+                      (if (<= (+ start i) end)
+                        (+ start i)
+                        0))]]
+              x))))
+        weeks))))
+
+
+(defn calendar []
   [:section
-    [:h2 (nth localeMonths (dec (time/as now :month-of-year)))]
+    [:h2 (nth localeMonths (dec (time/as (now) :month-of-year)))]
     [:.calendar
-      (for [week month]
+      (for [week (getMonths)]
         [:.calendar__row
           (for [day week]
-            [:div { :class ["calendar__cell" (when (= day (time/as now :day-of-month)) "calendar__cell_today")] }
+            [:div { :class ["calendar__cell" (when (= day (time/as (now) :day-of-month)) "calendar__cell_today")] }
               (when (> day 0) day)])])]])
 
 
-(def weather
+(defn weather []
   (try
     [:section
       [:h2 "Погода в Москве"]
@@ -113,10 +120,10 @@
         "°"]]
     (catch Exception e
       (println "Weather request failed:"))))
-
+    
 
 (rum/defc index [movies]
-  (page "Саша Мансуров" calendar weather))
+  (page "Саша Мансуров" (calendar) (weather)))
 
 
 (defn render-html [component]
