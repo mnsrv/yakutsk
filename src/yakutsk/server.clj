@@ -50,7 +50,7 @@
   [:html
     [:head
       [:meta { :charset "utf-8" }]
-      [:title "Сайт Саши Мансурова"]
+      [:title "Саша Мансуров"]
       [:meta { :name "viewport" :content "initial-scale=1.0, width=device-width" }]
       [:style { :dangerouslySetInnerHTML { :__html styles } }]]
     [:body
