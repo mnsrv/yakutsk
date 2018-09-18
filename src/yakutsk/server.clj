@@ -54,10 +54,12 @@
       [:meta { :name "viewport" :content "initial-scale=1.0, width=device-width" }]
       [:style { :dangerouslySetInnerHTML { :__html styles } }]]
     [:body
-      [:nav
-        [:ul
-          [:li
-            [:a { :href "/" } [:span "Главная"]]]]]
+      [:header
+        [:nav
+          [:ul
+            [:li
+              [:a { :href "/" } [:span "Главная"]]]]]
+        (weather)]
       [:main children]]])
 
 (def localeMonths
@@ -111,20 +113,18 @@
 
 (defn weather []
   (try
-    [:section
-      [:h2 "Погода в Москве"]
-      [:.weather
-        (Math/round
-          (:temperature
-            (:body
-              (http/get "https://api.mansurov.me/weather" { :as :json }))))
-        "°"]]
+    [:span.weather
+      (Math/round
+        (:temperature
+          (:body
+            (http/get "https://api.mansurov.me/weather" { :as :json }))))
+      "°"]
     (catch Exception e
       (println "Weather request failed:"))))
     
 
 (rum/defc index [movies]
-  (page (calendar) (weather)))
+  (page (calendar)))
 
 
 (defn render-html [component]
