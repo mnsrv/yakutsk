@@ -46,17 +46,18 @@
     [:p "Год релиза: " (render-date-year (:released movie))]])
 
 
-(rum/defc page [title & children]
+(rum/defc page [& children]
   [:html
     [:head
       [:meta { :charset "utf-8" }]
-      [:title "Саша Мансуров"]
+      [:title "mansurov.me"]
       [:meta { :name "viewport" :content "initial-scale=1.0, width=device-width" }]
       [:style { :dangerouslySetInnerHTML { :__html styles } }]]
     [:body
-      [:header
-        [:h1 title]
-        [:p "Фронтенд разработчик в Рокетбанке"]]
+      [:nav
+        [:ul
+          [:li
+            [:a { :href "/" } [:span "Главная"]]]]]
       [:main children]]])
 
 (def localeMonths
@@ -123,7 +124,7 @@
     
 
 (rum/defc index [movies]
-  (page "Саша Мансуров" (calendar) (weather)))
+  (page (calendar) (weather)))
 
 
 (defn render-html [component]
