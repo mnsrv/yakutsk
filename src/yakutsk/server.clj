@@ -46,6 +46,27 @@
     [:p "Год релиза: " (render-date-year (:released movie))]])
 
 
+(rum/defc weather []
+  (try
+    [:span.weather
+      (Math/round
+        (:temperature
+          (:body
+            (http/get "https://api.mansurov.me/weather" { :as :json }))))
+      "°"]
+    (catch Exception e
+      (println "Weather request failed:"))))
+
+
+(rum/defc header []
+  [:header
+    [:nav
+      [:ul
+        [:li
+          [:a { :href "/" } [:span "Главная"]]]]]
+    (weather)])
+
+
 (rum/defc page [& children]
   [:html
     [:head
@@ -54,12 +75,7 @@
       [:meta { :name "viewport" :content "initial-scale=1.0, width=device-width" }]
       [:style { :dangerouslySetInnerHTML { :__html styles } }]]
     [:body
-      [:header
-        [:nav
-          [:ul
-            [:li
-              [:a { :href "/" } [:span "Главная"]]]]]
-        (weather)]
+      (header)
       [:main children]]])
 
 (def localeMonths
@@ -100,7 +116,7 @@
         weeks))))
 
 
-(defn calendar []
+(rum/defc calendar []
   [:section
     [:h2 (nth localeMonths (dec (time/as (now) :month-of-year)))]
     [:.calendar
@@ -109,18 +125,6 @@
           (for [day week]
             [:div { :class ["calendar__cell" (when (= day (time/as (now) :day-of-month)) "calendar__cell_today")] }
               (when (> day 0) day)])])]])
-
-
-(defn weather []
-  (try
-    [:span.weather
-      (Math/round
-        (:temperature
-          (:body
-            (http/get "https://api.mansurov.me/weather" { :as :json }))))
-      "°"]
-    (catch Exception e
-      (println "Weather request failed:"))))
     
 
 (rum/defc index [movies]
