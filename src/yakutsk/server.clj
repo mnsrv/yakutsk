@@ -48,12 +48,12 @@
 
 (rum/defc weather []
   (try
-    [:span.weather
-      (Math/round
-        (:temperature
-          (:body
-            (http/get "https://api.mansurov.me/weather" { :as :json }))))
-      "°"]
+    (let [response (:body (http/get "https://api.mansurov.me/weather" { :as :json }))]
+      [:.weather
+        [:span.weather__emoji (:emoji response)]
+        [:span
+          (Math/round (:temperature response))
+          "°"]])
     (catch Exception e
       (println "Weather request failed:"))))
 

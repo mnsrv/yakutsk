@@ -72,3 +72,6 @@ main {
 .weather {
   font-weight: 100;
 }
+.weather__emoji {
+  margin-right: 5px;
+}
