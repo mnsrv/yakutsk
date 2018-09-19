@@ -52,6 +52,9 @@
       [:.weather
         [:span.weather__emoji (:emoji response)]
         [:span
+          (if (> (:temperature response) 0)
+            "+"
+            "")
           (Math/round (:temperature response))
           "°"]])
     (catch Exception e
