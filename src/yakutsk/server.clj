@@ -68,7 +68,8 @@
 
 (rum/defc post-page [post-id]
   (page
-    (get-post post-id)))
+    [:.posts
+      (post (get-post post-id))]))
 
 
 (defn render-html [component]
