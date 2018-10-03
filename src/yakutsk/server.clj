@@ -1,11 +1,11 @@
 (ns yakutsk.server
   (:require
     [rum.core :as rum]
-    [java-time :as time]
+    [ring.util.response]
+    [clojure.edn :as edn]
     [immutant.web :as web]
-    [clojure.java.io :as io]
-    [clj-http.client :as http]
-    [compojure.core :as compojure])
+    [compojure.core :as compojure]
+    [clojure.java.io :as io])
   (:import
     [org.joda.time DateTime]
     [org.joda.time.format DateTimeFormat])
@@ -26,48 +26,19 @@
 
 
 (def styles (slurp (io/resource "style.css")))
-
 (def date-formatter (DateTimeFormat/forPattern "dd.MM.YYYY"))
-(def date-year-formatter (DateTimeFormat/forPattern "YYYY"))
 
 
 (defn render-date [inst]
   (.print date-formatter (DateTime. inst)))
 
-(defn render-date-year [inst]
-  (.print date-year-formatter (DateTime. inst)))
 
-
-(rum/defc movie [movie]
-  [:.movie
-    [:span (render-date (:watched movie))]
-    [:h2 (:title movie)]
-    [:p "Оценка: " (:rate movie)]
-    [:p "Год релиза: " (render-date-year (:released movie))]])
-
-
-(rum/defc weather []
-  (try
-    (let [response (:body (http/get "https://api.mansurov.me/weather" { :as :json }))]
-      [:.weather
-        [:span.weather__emoji (:emoji response)]
-        [:span
-          (if (> (:temperature response) 0)
-            "+"
-            "")
-          (Math/round (:temperature response))
-          "°"]])
-    (catch Exception e
-      (println "Weather request failed:"))))
-
-
-(rum/defc header []
-  [:header
-    [:nav
-      [:ul
-        [:li
-          [:a { :href "/" } [:span "Главная"]]]]]
-    (weather)])
+(rum/defc post [post]
+  [:.post
+    (for [name (:pictures post)]
+      [:img.post__image { :src (str "/post/" (:id post) "/" name) }])
+    [:p (:body post)]
+    [:p [:a {:href (str "/post/" (:id post))} (render-date (:created post))]]])
 
 
 (rum/defc page [& children]
@@ -78,75 +49,55 @@
       [:meta { :name "viewport" :content "initial-scale=1.0, width=device-width" }]
       [:style { :dangerouslySetInnerHTML { :__html styles } }]]
     [:body
-      (header)
       [:main children]]])
 
-(def localeMonths
-  ["Январь", "Февраль", "Март",
-    "Апрель", "Май", "Июнь",
-    "Июль", "Август", "Сентябрь",
-    "Октябрь", "Ноябрь", "Декабрь"])
+
+(defn get-post [post-id]
+  (let [path (str "posts/" post-id "/post.edn")]
+    (-> (io/file path)
+        (slurp)
+        (edn/read-string))))
 
 
-(defn now []
-  (time/local-date-time))
-(defn getMonths []
-  (let [firstDay (time/adjust (now) :first-day-of-month)
-        daysInMonth (time/max-value (time/property (now) :day-of-month))]
-    (loop [start 1
-           end (if (time/sunday? firstDay)
-              1
-              (- 8 (time/as firstDay :day-of-week)))
-           weeks []]
-      (if (<= start daysInMonth)
-        (recur
-          (inc end)
-          (if (> (+ 7 end) daysInMonth)
-            daysInMonth
-            (+ 7 end))
-          (conj weeks
-            (vec
-              (for [i (range 7)
-                :let [x
-                  (cond
-                    (= 6 (- end start)) (+ start i)
-                    (= 1 start) (if (> (+ end i -6) 0) (+ end i -6) 0)
-                    :else
-                      (if (<= (+ start i) end)
-                        (+ start i)
-                        0))]]
-              x))))
-        weeks))))
+(rum/defc index-page [post-ids]
+  (page
+    [:.posts
+      (for [post-id post-ids]
+        (post (get-post post-id)))]))
 
 
-(rum/defc calendar []
-  [:section
-    [:h2 (nth localeMonths (dec (time/as (now) :month-of-year)))]
-    [:.calendar
-      (for [week (getMonths)]
-        [:.calendar__row
-          (for [day week]
-            [:div { :class ["calendar__cell" (when (= day (time/as (now) :day-of-month)) "calendar__cell_today")] }
-              (when (> day 0) day)])])]])
-    
-
-(rum/defc index [movies]
-  (page (calendar)))
+(rum/defc post-page [post-id]
+  (page
+    (get-post post-id)))
 
 
 (defn render-html [component]
   (str "<!DOCTYPE html>" (rum/render-static-markup component)))
 
 
+(defn post-ids []
+  (for [name (seq (.list (io/file "posts")))
+        :let [child (io/file "posts" name)]
+        :when (.isDirectory child)]
+    name))
+
+
 (compojure/defroutes routes
   (compojure/GET "/" [:as req]
-    { :body (render-html (index movies)) })
+    { :body (render-html (index-page (post-ids))) })
 
-  (compojure/GET "/write" [:as req]
-    { :body "WRITE" })
+  (compojure/GET "/post/:post-id" [post-id]
+    { :body (render-html (post-page post-id)) })
 
-  (compojure/POST "/write" [:as req]
-    { :body "POST" })
+  (compojure/GET "/post/:post-id/:img" [post-id img]
+    (ring.util.response/file-response (str "posts/" post-id "/" img)))
+
+  ; (compojure/GET "/write" [:as req]
+  ;   { :body "WRITE" })
+
+  ; (compojure/POST "/write" [:as req]
+  ;   { :body "POST" })
+
   (fn [req]
     { :status 404
       :body "404 Not found" }))

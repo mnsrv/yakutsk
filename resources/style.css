@@ -7,30 +7,14 @@ body {
   margin: 0;
 }
 
-header {
-  background-color: rgba(0,0,0,0.8);
-  color: white;
-  height: 48px;
-  max-height: 44px;
-  padding: 0 2rem;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
+img {
+  display: block;
 }
 
 ul {
   margin: 0;
   padding: 0;
   list-style: none;
-}
-
-a {
-  color: white;
-  text-decoration: none;
-}
-
-a span {
-  font-weight: 100;
 }
 
 section {
@@ -47,31 +31,15 @@ main {
   flex-wrap: wrap;
 }
 
-.calendar {
-  margin-top: -5px;
-  margin-left: -10px;
-  margin-right: -10px;
-}
-.calendar__row {
-  display: flex;
-}
-.calendar__cell {
-  flex: 1;
-  text-align: right;
-  padding: 0 5px;
-  font-family: monospace;
-  font-size: 1.5rem;
-  border-width: 5px;
-  border-style: solid;
-  border-color: transparent;
-}
-.calendar__cell_today {
-  border-color: red;
+.posts {
+  margin: 0 auto;
 }
 
-.weather {
-  font-weight: 100;
+.post {
+  max-width: 640px;
 }
-.weather__emoji {
-  margin-right: 5px;
+
+.post__image {
+  width: 100%;
+  margin-bottom: 1em;
 }
