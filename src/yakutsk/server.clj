@@ -43,7 +43,7 @@
 
   (rum/defc page [opts & children]
     (let [{:keys [index?]
-          :or {index? false}} opts]
+           :or {index? false}} opts]
       [:html
         [:head
           [:meta { :charset "utf-8" }]
