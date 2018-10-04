@@ -49,6 +49,8 @@
       [:meta { :name "viewport" :content "initial-scale=1.0, width=device-width" }]
       [:style { :dangerouslySetInnerHTML { :__html styles } }]]
     [:body
+      [:header 
+        [:h1 "mansurov.me"]]
       [:main children]]])
 
 
@@ -61,15 +63,13 @@
 
 (rum/defc index-page [post-ids]
   (page
-    [:.posts
-      (for [post-id post-ids]
-        (post (get-post post-id)))]))
+    (for [post-id post-ids]
+      (post (get-post post-id)))))
 
 
 (rum/defc post-page [post-id]
   (page
-    [:.posts
-      (post (get-post post-id))]))
+    (post (get-post post-id))))
 
 
 (defn render-html [component]
