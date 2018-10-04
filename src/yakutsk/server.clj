@@ -41,17 +41,21 @@
     [:p [:a {:href (str "/post/" (:id post))} (render-date (:created post))]]])
 
 
-(rum/defc page [& children]
-  [:html
-    [:head
-      [:meta { :charset "utf-8" }]
-      [:title "mansurov.me"]
-      [:meta { :name "viewport" :content "initial-scale=1.0, width=device-width" }]
-      [:style { :dangerouslySetInnerHTML { :__html styles } }]]
-    [:body
-      [:header 
-        [:h1 "mansurov.me"]]
-      [:main children]]])
+  (rum/defc page [opts & children]
+    (let [{:keys [index?]
+          :or {index? false}} opts]
+      [:html
+        [:head
+          [:meta { :charset "utf-8" }]
+          [:title "mansurov.me"]
+          [:meta { :name "viewport" :content "initial-scale=1.0, width=device-width" }]
+          [:style { :dangerouslySetInnerHTML { :__html styles } }]]
+        [:body
+          [:header
+            (if index?
+              [:h1 "mansurov.me"]
+              [:h1 [:a {:href "/"} "mansurov.me"]])]
+          [:main children]]]))
 
 
 (defn get-post [post-id]
@@ -62,13 +66,13 @@
 
 
 (rum/defc index-page [post-ids]
-  (page
+  (page {:index? true}
     (for [post-id post-ids]
       (post (get-post post-id)))))
 
 
 (rum/defc post-page [post-id]
-  (page
+  (page {}
     (post (get-post post-id))))
 
 
