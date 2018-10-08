@@ -6,6 +6,7 @@
     [immutant.web :as web]
     [ring.middleware.params]
     [compojure.core :as compojure]
+    [ring.middleware.multipart-params]
     [clojure.java.io :as io])
   (:import
     [java.util UUID]
@@ -84,10 +85,20 @@
     (str (UUID. new-high low))))
 
 
-(defn save-post! [post]
-  (let [dir (io/file (str "posts/" (:id post)))]
+(re-matches #".*(\.[^.]+)" "sash.a.p-ng")
+
+
+(defn save-post! [post pictures]
+  (let [dir           (io/file (str "posts/" (:id post)))
+        picture-names (for [[picture idx] (map vector pictures (range))
+                            :let [in-name  (:filename picture)
+                                  [_ ext]  (re-matches #".*(\.[^\.]+)" in-name)]]
+                        (str (:id post) "_" (inc idx) ext))]
     (.mkdir dir)
-    (spit (io/file dir "post.edn") (pr-str post))))
+    (doseq [[picture name] (map vector pictures picture-names)]
+      (io/copy (:tempfile picture) (io/file dir name))
+      (.delete (:tempfile picture)))
+    (spit (io/file dir "post.edn") (pr-str (assoc post :pictures (vec picture-names))))))
 
 
 (rum/defc index-page [post-ids]
@@ -106,14 +117,18 @@
         create? (nil? post)]
     (page {:title (if create? "Создание" "Редактирование")}
       [:form { :action (str "/post/" post-id "/edit")
+               :enc-type "multipart/form-data"
                :method "post" }
-        [:textarea.edit_post__body
-          { :value (:body post "")
-            :name "body"
-            :placeholder "Пиши сюда..." }]
-        [:input.edit_post__submit
-          { :type "submit"
-            :value (if create? "Создать" "Сохранить") }]])))
+        [:.edit_post__picture
+          [:input { :type "file" :name "picture" }]]
+        [:.edit_post__body
+          [:textarea
+            { :value (:body post "")
+              :name "body"
+              :placeholder "Пиши сюда..." }]]
+        [:.edit_post__submit
+          [:button
+            (if create? "Создать" "Сохранить") ]]])))
 
 
 (defn render-html [component]
@@ -144,13 +159,17 @@
   (compojure/GET "/post/:post-id/edit" [post-id]
     { :body (render-html (edit-post-page post-id)) })
 
-  (compojure/POST "/post/:post-id/edit" [post-id :as req]
-    (let [params (:form-params req)
-          body   (get params "body")]
-      (save-post! { :id post-id
-                    :body body })
-      { :status 302
-        :headers { "Location" (str "/post/" post-id) }}))
+  (ring.middleware.multipart-params/wrap-multipart-params
+    (compojure/POST "/post/:post-id/edit" [post-id :as req]
+      (let [params  (:multipart-params req)
+            body    (get params "body")
+            picture (get params "picture")]
+          ;; fixme pictures not empty if empty
+        (save-post! { :id post-id
+                      :body body }
+                    [picture])
+        { :status 302
+          :headers { "Location" (str "/post/" post-id) }})))
 
   (fn [req]
     { :status 404
@@ -163,12 +182,25 @@
       (update :headers merge headers))))
 
 
+(defn print-errors [handler]
+  (fn [req]
+    (try
+      (handler req)
+      (catch Exception e
+        (.printStackTrace e)
+        { :status 500
+          :headers { "Content-Type" "text/html; charset=utf-8" }
+          :body (with-out-str
+                  (clojure.stacktrace/print-stack-trace (clojure.stacktrace/root-cause e))) }))))
+
+
 (def app
   (-> routes
     (ring.middleware.params/wrap-params)
     (with-headers { "Content-Type"  "text/html; charset=utf-8"
                     "Cache-Control" "no-cache"
-                    "Expires"       "-1" })))
+                    "Expires"       "-1" })
+    (print-errors)))
 
 
 (defn -main [& args]
