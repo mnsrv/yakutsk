@@ -85,9 +85,6 @@
     (str (UUID. new-high low))))
 
 
-(re-matches #".*(\.[^.]+)" "sash.a.p-ng")
-
-
 (defn save-post! [post pictures]
   (let [dir           (io/file (str "posts/" (:id post)))
         picture-names (for [[picture idx] (map vector pictures (range))
